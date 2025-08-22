@@ -43,3 +43,22 @@ CREATE POLICY "file_hashes_referenced_read" ON public.file_hashes
 CREATE INDEX IF NOT EXISTS idx_media_user_id ON public.media(user_id);
 CREATE INDEX IF NOT EXISTS idx_media_hash ON public.media(hash);
 CREATE INDEX IF NOT EXISTS idx_file_hashes_hash ON public.file_hashes(hash);
+
+CREATE POLICY "file_hashes_select_authenticated" ON public.file_hashes
+  FOR SELECT TO authenticated
+  USING (true);
+
+CREATE POLICY "file_hashes_insert_authenticated" ON public.file_hashes
+  FOR INSERT TO authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "file_hashes_update_authenticated" ON public.file_hashes
+  FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "media_owner_insert" ON public.media
+  FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+

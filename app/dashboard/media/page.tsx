@@ -75,15 +75,17 @@ export default function MediaPage() {
     }
   }
 
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.startsWith("image/")) return <ImageIcon className="w-5 h-5" />
-    if (mimeType.startsWith("video/")) return <Video className="w-5 h-5" />
+  const getFileIcon = (mimeType: string | undefined) => {
+    const mt = mimeType ?? ""
+    if (mt.startsWith("image/")) return <ImageIcon className="w-5 h-5" />
+    if (mt.startsWith("video/")) return <Video className="w-5 h-5" />
     return <File className="w-5 h-5" />
   }
 
-  const getFileTypeColor = (mimeType: string) => {
-    if (mimeType.startsWith("image/")) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-    if (mimeType.startsWith("video/")) return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+  const getFileTypeColor = (mimeType: string | undefined) => {
+    const mt = mimeType ?? ""
+    if (mt.startsWith("image/")) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+    if (mt.startsWith("video/")) return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
     return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
   }
 
@@ -100,11 +102,12 @@ export default function MediaPage() {
       file.original_filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
       file.alt_text?.toLowerCase().includes(searchTerm.toLowerCase())
 
+    const mt = file.mime_type ?? ""
     const matchesType =
       filterType === "all" ||
-      (filterType === "images" && file.mime_type.startsWith("image/")) ||
-      (filterType === "videos" && file.mime_type.startsWith("video/")) ||
-      (filterType === "documents" && !file.mime_type.startsWith("image/") && !file.mime_type.startsWith("video/"))
+      (filterType === "images" && mt.startsWith("image/")) ||
+      (filterType === "videos" && mt.startsWith("video/")) ||
+      (filterType === "documents" && !mt.startsWith("image/") && !mt.startsWith("video/"))
 
     return matchesSearch && matchesType
   })
@@ -236,14 +239,14 @@ export default function MediaPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         {getFileIcon(file.mime_type)}
-                        <Badge className={getFileTypeColor(file.mime_type)}>{file.mime_type.split("/")[0]}</Badge>
+                        <Badge className={getFileTypeColor(file.mime_type)}>{(file.mime_type?.split("/")[0]) ?? "file"}</Badge>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
                     {/* File Preview */}
                     <div className="mb-4">
-                      {file.mime_type.startsWith("image/") ? (
+                      {file.mime_type?.startsWith("image/") ? (
                         <div className="aspect-video bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden">
                           <img
                             src={file.file_path || "/placeholder.svg"}
