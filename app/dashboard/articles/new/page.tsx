@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import MarkdownEditor from "@/components/markdown/MarkdownEditor"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Save, Eye } from "lucide-react"
@@ -198,18 +199,15 @@ export default function NewArticlePage() {
               <CardContent>
                 <div className="space-y-2">
                   <Label htmlFor="content">Article Content *</Label>
-                  <Textarea
-                    id="content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Start writing your article..."
-                    rows={20}
-                    required
-                    className="border-slate-300 dark:border-slate-600 font-mono"
-                  />
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    You can use Markdown formatting for rich text.
-                  </p>
+                  {/* Markdown Editor */}
+                  <div className="mt-2">
+                    <MarkdownEditor
+                      value={content}
+                      onChange={setContent}
+                      placeholder="使用 Markdown 开始写作..."
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">支持 Markdown 语法与预览。</p>
                 </div>
               </CardContent>
             </Card>

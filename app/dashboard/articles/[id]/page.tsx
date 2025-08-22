@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { UserAvatar } from "@/components/user-avatar"
 import { ArrowLeft, Edit, Trash2, Calendar, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import MarkdownRenderer from "@/components/markdown/MarkdownRenderer"
+import Toc from "@/components/markdown/Toc"
 
 interface Article {
   id: string
@@ -46,6 +48,7 @@ export default function ArticlePage() {
   const [article, setArticle] = useState<Article | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [headings, setHeadings] = useState<{ id: string; text: string; level: number }[]>([])
   const router = useRouter()
   const params = useParams()
   const articleId = params.id as string
@@ -212,11 +215,7 @@ export default function ArticlePage() {
             </CardHeader>
             <CardContent>
               <div className="prose prose-slate dark:prose-invert max-w-none">
-                {article.content.split("\n").map((paragraph, index) => (
-                  <p key={index} className="mb-4 leading-relaxed">
-                    {paragraph}
-                  </p>
-                ))}
+                <MarkdownRenderer content={article.content} onHeadingsExtracted={setHeadings} />
               </div>
             </CardContent>
           </Card>
