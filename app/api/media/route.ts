@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getCurrentUser } from "@/lib/auth"
+import fs from "fs"
+import path from "path"
 
 export async function GET() {
   try {
@@ -46,7 +48,27 @@ export async function GET() {
         }),
     )
 
-    return NextResponse.json({ media: mediaWithUsers })
+    // Map to local URL for preview & download
+    const mapped = mediaWithUsers.map((m: any) => {
+      const fh = Array.isArray(m.file_hashes) ? m.file_hashes[0] : m.file_hashes
+      const storagePath: string | undefined = fh?.storage_path
+      const fileUrl = storagePath ? `/${storagePath.replace(/\\/g, "/")}` : null
+
+      return {
+        id: m.id,
+        original_filename: m.original_filename,
+        created_at: m.created_at,
+        updated_at: m.updated_at,
+        user: m.user,
+        file_size: fh?.file_size ?? null,
+        mime_type: fh?.mime_type ?? null,
+        filename: fh?.filename ?? null,
+        file_path: fileUrl,
+        alt_text: null,
+      }
+    })
+
+    return NextResponse.json({ media: mapped })
   } catch (error) {
     console.error("Media fetch error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
@@ -64,6 +86,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get("file") as File
+    const altText = (formData.get("altText") as string) || null
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
@@ -78,15 +101,21 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const randomString = Math.random().toString(36).substring(2, 15)
-    const fileExtension = file.name.split(".").pop()
-    const filename = `${timestamp}_${randomString}.${fileExtension}`
+    const fileExtension = file.name.includes(".") ? file.name.split(".").pop() : undefined
+    const filename = fileExtension ? `${timestamp}_${randomString}.${fileExtension}` : `${timestamp}_${randomString}`
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // For demo purposes, we'll store the file path as a placeholder
-    const storagePath = `/uploads/${filename}`
+    // Write to local filesystem under public/Storage/media/{userId}
+    const baseDir = path.join(process.cwd(), "public", "Storage", "media", user.id)
+    await fs.promises.mkdir(baseDir, { recursive: true })
+    const absFilePath = path.join(baseDir, filename)
+    await fs.promises.writeFile(absFilePath, buffer)
+
+    // Relative path used for URL and DB (POSIX style for URLs)
+    const storagePath = path.posix.join("Storage", "media", user.id, filename)
 
     // Calculate file hash for deduplication
     const crypto = require("crypto")
@@ -99,7 +128,7 @@ export async function POST(request: NextRequest) {
       // Increment reference count
       const { data: updatedHash, error: updateError } = await supabase
           .from("file_hashes")
-          .update({ reference_count: existingHash.reference_count + 1 })
+          .update({ reference_count: existingHash.reference_count + 1, storage_path: storagePath })
           .eq("hash", hash)
           .select()
           .single()
@@ -145,11 +174,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to save media file" }, { status: 500 })
     }
 
+    // Build local preview URL
+    const fileUrl = `/${storagePath}`
+
     return NextResponse.json({
       message: "File uploaded successfully",
       media: {
         ...mediaData,
         file_info: fileHashData,
+        file_path: fileUrl,
+        alt_text: altText,
       },
     })
   } catch (error) {
