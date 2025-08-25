@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getCurrentUser } from "@/lib/auth"
+import { logMediaUploaded } from "@/lib/activity-logger"
 import fs from "fs"
 import path from "path"
 
@@ -172,6 +173,14 @@ export async function POST(request: NextRequest) {
     if (mediaError) {
       console.error("Database error:", mediaError)
       return NextResponse.json({ error: "Failed to save media file" }, { status: 500 })
+    }
+
+    // Log activity
+    try {
+      await logMediaUploaded(mediaData.id.toString(), file.name, file.size, user.id)
+    } catch (logError) {
+      console.error("Failed to log activity:", logError)
+      // Don't fail the request if logging fails
     }
 
     // Build local preview URL

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { logArticleUpdated, logArticleDeleted } from "@/lib/activity-logger"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -97,7 +98,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     // Check if article exists and user owns it
     const { data: article, error: fetchError } = await supabase
       .from("articles")
-      .select("id, user_id")
+      .select("id, user_id, title")
       .eq("id", articleId)
       .single()
 
@@ -118,6 +119,14 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     if (deleteError) {
       console.error("Delete error:", deleteError)
       return NextResponse.json({ error: "Failed to delete article" }, { status: 500 })
+    }
+
+    // Log activity
+    try {
+      await logArticleDeleted(articleId, article.title, user.id)
+    } catch (logError) {
+      console.error("Failed to log activity:", logError)
+      // Don't fail the request if logging fails
     }
 
     return NextResponse.json({ message: "Article deleted successfully" })
@@ -156,7 +165,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     // Check if article exists and user owns it
     const { data: existingArticle, error: fetchError } = await supabase
       .from("articles")
-      .select("id, user_id")
+      .select("id, user_id, title")
       .eq("id", articleId)
       .single()
 
@@ -201,6 +210,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (contentError) {
       console.error("Content update error:", contentError)
       return NextResponse.json({ error: "Failed to update article content" }, { status: 500 })
+    }
+
+    // Log activity
+    try {
+      await logArticleUpdated(articleId, title, user.id)
+    } catch (logError) {
+      console.error("Failed to log activity:", logError)
+      // Don't fail the request if logging fails
     }
 
     return NextResponse.json({

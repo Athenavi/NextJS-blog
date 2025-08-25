@@ -33,6 +33,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   Media
                 </Link>
                 <Link
+                  href="/dashboard/activity"
+                  className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                >
+                  Activity
+                </Link>
+                <Link
                   href="/dashboard/profile"
                   className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                 >

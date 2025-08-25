@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { logArticleCreated } from "@/lib/activity-logger"
 
 export async function GET(request: NextRequest) {
   try {
@@ -149,6 +150,14 @@ export async function POST(request: NextRequest) {
       // Clean up the article if content creation fails
       await supabase.from("articles").delete().eq("id", article.id)
       return NextResponse.json({ error: "Failed to create article content" }, { status: 500 })
+    }
+
+    // Log activity
+    try {
+      await logArticleCreated(article.id.toString(), title, user.id)
+    } catch (logError) {
+      console.error("Failed to log activity:", logError)
+      // Don't fail the request if logging fails
     }
 
     return NextResponse.json({ article }, { status: 201 })
