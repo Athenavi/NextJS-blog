@@ -155,6 +155,51 @@ export default async function HomePage({ searchParams }: { searchParams?: Promis
               <Link href="/auth/register">Create Account</Link>
             </Button>
           </div>
+
+          {/* Footer Links */}
+          <div className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-700">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">网站导航</h3>
+                <div className="space-y-2">
+                  <Link href="/sitemap" className="block text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    网站地图
+                  </Link>
+                  <Link href="/rss" className="block text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    RSS订阅
+                  </Link>
+                  <Link href="/robots.txt" className="block text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    Robots.txt
+                  </Link>
+                </div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">用户功能</h3>
+                <div className="space-y-2">
+                  <Link href="/auth/login" className="block text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    用户登录
+                  </Link>
+                  <Link href="/auth/register" className="block text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    用户注册
+                  </Link>
+                  <Link href="/articles" className="block text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    文章列表
+                  </Link>
+                </div>
+              </div>
+                              <div className="text-center">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">技术支持</h3>
+                  <div className="space-y-2">
+                    <span className="block text-slate-600 dark:text-slate-400">
+                      版本: 1.0.0
+                    </span>
+                    <span className="block text-slate-600 dark:text-slate-400">
+                      更新: 2024-01-01
+                    </span>
+                  </div>
+                </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
