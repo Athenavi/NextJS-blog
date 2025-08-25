@@ -88,7 +88,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     // Log activity
     try {
-      await logMediaDeleted(id, mediaFile.original_filename, user.id)
+      await logMediaDeleted(id, mediaFile.original_filename, user.id,request)
     } catch (logError) {
       console.error("Failed to log activity:", logError)
       // Don't fail the request if logging fails

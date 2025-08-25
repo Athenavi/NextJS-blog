@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
 
     // Log activity
     try {
-      await logArticleCreated(article.id.toString(), title, user.id)
+      await logArticleCreated(article.id.toString(), title, user.id,request)
     } catch (logError) {
       console.error("Failed to log activity:", logError)
       // Don't fail the request if logging fails

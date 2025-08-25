@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
-    
+    const supabase = await createClient()
+
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -15,11 +13,15 @@ export async function GET(request: NextRequest) {
 
     // Get query parameters
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const limit = parseInt(searchParams.get('limit') || '50', 10)
+    const offset = parseInt(searchParams.get('offset') || '0', 10)
     const activityType = searchParams.get('type') || null
     const entityType = searchParams.get('entity_type') || null
     const userId = searchParams.get('user_id') || null
+
+    if (Number.isNaN(limit) || Number.isNaN(offset)) {
+      return NextResponse.json({ error: 'Invalid query parameters' }, { status: 400 })
+    }
 
     // Call the database function to get activities
     const { data: activities, error } = await supabase.rpc('get_user_activities', {
@@ -40,9 +42,9 @@ export async function GET(request: NextRequest) {
     if (offset === 0) {
       const { count } = await supabase
         .from('activity_logs')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
-      
+
       totalCount = count || 0
     }
 
@@ -64,8 +66,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = await createClient()
     
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()

@@ -123,7 +123,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     // Log activity
     try {
-      await logArticleDeleted(articleId, article.title, user.id)
+      await logArticleDeleted(articleId, article.title, user.id,request)
     } catch (logError) {
       console.error("Failed to log activity:", logError)
       // Don't fail the request if logging fails
@@ -214,7 +214,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // Log activity
     try {
-      await logArticleUpdated(articleId, title, user.id)
+      await logArticleUpdated(articleId, title, user.id,request)
     } catch (logError) {
       console.error("Failed to log activity:", logError)
       // Don't fail the request if logging fails

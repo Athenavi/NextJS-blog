@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
 
     // Log activity
     try {
-      await logMediaUploaded(mediaData.id.toString(), file.name, file.size, user.id)
+      await logMediaUploaded(mediaData.id.toString(), file.name, file.size, user.id,request)
     } catch (logError) {
       console.error("Failed to log activity:", logError)
       // Don't fail the request if logging fails
